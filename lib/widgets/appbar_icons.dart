@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppBarIcons extends StatelessWidget {
    const AppBarIcons({
     Key? key,
-    required this.function,
+     required this.function,
     required this.icon,
   }) : super(key: key);
 

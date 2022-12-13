@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:store_api_flutter/screens/categories_screen.dart';
 import 'package:store_api_flutter/screens/home_screen.dart';
+import 'package:store_api_flutter/widgets/category_widget.dart';
 
 import '../constants/global_colors.dart';
 
@@ -44,6 +46,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: const HomeScreen(title: 'Flutter Demo Home Page'),
+      // home: CategoriesScreen(),
     );
   }
 }

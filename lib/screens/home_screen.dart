@@ -1,9 +1,18 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:store_api_flutter/screens/categories_screen.dart';
+import 'package:store_api_flutter/screens/feeds_screen.dart';
+import 'package:store_api_flutter/screens/users_screen.dart';
+import 'package:store_api_flutter/services/api_hundler.dart';
 import 'package:store_api_flutter/widgets/appbar_icons.dart';
+import 'package:store_api_flutter/widgets/users_widget.dart';
 
 import '../constants/global_colors.dart';
+import '../models/products_model.dart';
+import '../widgets/feeds_grid.dart';
+import '../widgets/feeds_widget.dart';
 import '../widgets/sale_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,21 +25,43 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  TextEditingController? _textEditingController;
+  late TextEditingController _textEditingController;
+
+  // Определяем переменную с возвращаемым списком ProductsModel
+  // List<ProductsModel> productsList = [];
 
   // Сохраняем данные в текстовом поле (TextFormField)
   @override
   void initState() {
-    TextEditingController _textEditingController = TextEditingController();
+    _textEditingController = TextEditingController();
     super.initState();
   }
+
+  /* ------------------------------------------------------------- */
 
   // При переходе на другую страницу удаляем данные
   @override
   void dispose() {
-    _textEditingController?.dispose();
+    _textEditingController.dispose();
     super.dispose();
   }
+
+  /* ------------------------------------------------------------- */
+
+// Изменил зависимость
+//   @override
+//   void didChangeDependencies() {
+//     getProducts();
+//     super.didChangeDependencies();
+//   }
+//
+//   // Получаем данные с файла (api_handler.dart)
+//   Future<void> getProducts() async {
+//     productsList = await APIHandler.getAllProducts();
+//     setState(() {});
+//   }
+
+  /* ------------------------------------------------------------- */
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +81,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 flex: 3,
                 child: AppBarIcons(
                   icon: IconlyBold.category,
-                  function: () {},
+                  function: () {
+                    Navigator.push(
+                      context,
+                      PageTransition(
+                        child: const CategoriesScreen(),
+                        type: PageTransitionType.fade,
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -59,16 +98,27 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             // Our widget
             AppBarIcons(
-              function: () {},
               icon: IconlyBold.user3,
+              function: () {
+                Navigator.push(
+                  context,
+                  PageTransition(
+                    child: const UsersScreen(),
+                    type: PageTransitionType.fade,
+                  ),
+                );
+              },
             ),
           ],
         ),
+
+        //  Block "TextEditingController" form search
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 20,bottom: 20,left: 10, right: 10),
-              child: TextFormField(
+              padding: const EdgeInsets.only(
+                  top: 20, bottom: 20, left: 10, right: 10),
+              child: TextField(
                 controller: _textEditingController,
                 keyboardType: TextInputType.text,
                 decoration: InputDecoration(
@@ -95,7 +145,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            // const SizedBox(height: 20,),
+
+            //  Block Slider
             SizedBox(
               height: size.height * 0.25,
               child: Swiper(
@@ -116,6 +167,57 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+            ),
+
+            //  Block "Latest Products",
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  const Text(
+                    "Latest Products",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const Spacer(),
+                  AppBarIcons(
+                    function: () {
+                      Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.fade,
+                          child: const FeedsScreen(),
+                        ),
+                      );
+                    },
+                    icon: IconlyBold.arrowRight2,
+                  ),
+                ],
+              ),
+            ),
+
+            // Block List Widgets
+            const SizedBox(height: 30),
+            // Получаем данные всех продуктов
+            FutureBuilder<List<ProductsModel>>(
+              future: APIHandler.getAllProducts(),
+              builder: (context, jsonData) {
+                if (jsonData.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                        color: Colors.green, strokeWidth: 8),
+                  );
+                } else if (jsonData.hasError) {
+                  Center(
+                    child: Text("An error occurred ${jsonData.error}"),
+                  );
+                } else if (jsonData.data == null) {
+                  const Text("No products has been added yet}");
+                }
+                return FeedsGridWidget(productsList: jsonData.data!);
+              },
             ),
           ],
         ),

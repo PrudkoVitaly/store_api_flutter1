@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'feeds_widget.dart';
+
 class SaleWidget extends StatelessWidget {
   const SaleWidget({Key? key}) : super(key: key);
 
